@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Yandex Gallery</string>
+    <string name="my_lenta">Моя лента</string>
+    <string name="loginText1">Войти в\u0020</string>
+    <string name="loginText2">Я</string>
+    <string name="loginText3">ндекс</string>
+    <string name="appId">f4a1654a4cde40b2858380e2e89e6385</string>
+    <string name="OAuthURL">https://oauth.yandex.ru/authorize?response_type=token&amp;client_id=f4a1654a4cde40b2858380e2e89e6385</string>
+    <string name="exit">Выйти</string>
+</resources>
