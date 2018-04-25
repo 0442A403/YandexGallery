@@ -1,14 +1,11 @@
 package com.yandexgallery.yandexgallery
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v4.widget.NestedScrollView
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
-import android.view.View
 import android.view.ViewGroup
 import android.widget.GridView
 import android.widget.ImageView
@@ -58,7 +55,7 @@ class MainActivity : AppCompatActivity(), OnGetPhotoInfoListener {
                 val title = TextView(this)
                 title.text = day
                 title.textSize = 24 / resources.displayMetrics.scaledDensity
-                title.setTextColor(ContextCompat.getColor(this, R.color.white))
+                title.setTextColor(ContextCompat.getColor(this, R.color.textColorPrimary))
                 linearLayout__main_activity.addView(title)
                 val gridView = ExpandableHeightGridView(this)
                 gridView.adapter = PhotoAdapter(this)

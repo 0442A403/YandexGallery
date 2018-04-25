@@ -51,7 +51,7 @@
             android:layout_height="match_parent"
             android:layout_gravity="start"
             app:menu="@menu/navigation"
-            app:itemTextColor="@color/white"/>
+            app:itemTextColor="@color/black"/>
 
     </android.support.v4.widget.DrawerLayout>
 

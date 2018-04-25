@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#535661</color>
-    <color name="colorPrimaryDark">#424648</color>
-    <color name="textColorPrimary">#ffffff</color>
-    <color name="windowBackground">#535661</color>
+    <color name="colorPrimary">#FCFCFC</color>
+    <color name="colorPrimaryDark">#FFCC00</color>
+    <color name="textColorPrimary">#000000</color>
+    <color name="windowBackground">#F4F4F4</color>
     <color name="colorAccent">#FF4081</color>
-    <color name="white">#ffffff</color>
-    <color name="yandexYellow">#ffdb4d</color>
-    <color name="red">#ff0000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="yandexYellow">#FFCC00</color>
+    <color name="red">#FF0000</color>
+    <color name="yandexYellowDark">#FFBA00</color>
+    <color name="black">#000000</color>
 </resources>
