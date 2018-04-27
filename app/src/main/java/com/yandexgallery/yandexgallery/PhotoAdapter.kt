@@ -1,7 +1,6 @@
 package com.yandexgallery.yandexgallery
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.os.Handler
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -12,8 +11,9 @@ class PhotoAdapter(private val context: Context,
                    private val info: List<PhotoInfo>,
                    handler: Handler) : RecyclerView.Adapter<PhotoCard>() {
     private var size: Int = 0
-    private val photoPack = 6
+    private val photoPack = 10
     private val holders = ArrayList<PhotoCard>()
+    private var lastDownload = -1L
     private val photoManager = PhotoManager(context, handler)
 
     init {
@@ -32,17 +32,22 @@ class PhotoAdapter(private val context: Context,
     }
 
     override fun onBindViewHolder(holder: PhotoCard, position: Int) {
-        holder.setData(info[position])
-        photoManager.addToQueue(info[position].link, holder)
+        holder.setData(info[position].created, info[position].name)
+        photoManager.setImageForHolder(holder, position, info[position].link)
     }
 
     override fun getItemCount(): Int = size
 
     fun loadPhotos() {
-        if (photoManager.isDone()) {
+        if (photoManager.isDone() && System.currentTimeMillis() - lastDownload >= 700) {
+            lastDownload = System.currentTimeMillis()
             val oldSize = size
             size = min(size + photoPack, info.size)
-            notifyItemRangeInserted(oldSize, size - oldSize)
+            notifyItemRangeChanged(oldSize, size - oldSize)
         }
+    }
+
+    fun close() {
+        photoManager.cancel(false)
     }
 }

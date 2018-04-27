@@ -3,6 +3,7 @@ package com.yandexgallery.yandexgallery
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.MotionEvent
@@ -13,6 +14,8 @@ import kotlinx.android.synthetic.main.activity_login.*
 
 class LoginActivity : AppCompatActivity() {
     private var webView: WebView? = null
+    private val touchPadding = 10
+    private val defaultPadding = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
@@ -20,7 +23,11 @@ class LoginActivity : AppCompatActivity() {
             start()
         yandexLogo__launcher.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN)
-                yandexLogoContainer__launcher.setPadding(10, 10, 10, 10)
+                yandexLogoContainer__launcher
+                        .setPadding(touchPadding,
+                                touchPadding,
+                                touchPadding,
+                                touchPadding)
             super.onTouchEvent(event)
         }
     }
@@ -34,11 +41,12 @@ class LoginActivity : AppCompatActivity() {
     fun login(v: View) {
         webView = WebView(this)
         webView!!.clearCache(true)
-        setContentView(webView)
+        contentContainer_launcher.visibility = View.GONE
+        webView_launcher.visibility = View.VISIBLE
         webView!!.settings.javaScriptEnabled = true
         webView!!.webViewClient = object: WebViewClient() {
-            override fun onPageFinished(view: WebView?, url: String?) {
-                super.onPageFinished(view, url)
+            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                super.onPageStarted(view, url, favicon)
                 if (url != null && url.contains("access_token")) {
                     getSharedPreferences("AppData", Context.MODE_PRIVATE)
                             .edit()
@@ -58,7 +66,14 @@ class LoginActivity : AppCompatActivity() {
         when {
             webView == null -> super.onBackPressed()
             webView!!.canGoBack() -> webView!!.goBack()
-            else -> setContentView(R.layout.activity_login)
+            else -> {
+                yandexLogoContainer__launcher.setPadding(defaultPadding,
+                        defaultPadding,
+                        defaultPadding,
+                        defaultPadding)
+                contentContainer_launcher.visibility = View.VISIBLE
+                webView_launcher.visibility = View.GONE
+            }
         }
     }
 }

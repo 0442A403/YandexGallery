@@ -3,25 +3,17 @@ package com.yandexgallery.yandexgallery
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.support.v4.content.ContextCompat
-import android.support.v4.widget.NestedScrollView
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
-import android.view.View
-import android.view.ViewGroup
-import android.widget.GridView
-import android.widget.ImageView
-import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlin.math.min
 
 
 class MainActivity : AppCompatActivity(), OnGetPhotoInfoListener {
     private var adapter: PhotoAdapter? = null
+    private var infoGetter: Thread? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -40,6 +32,7 @@ class MainActivity : AppCompatActivity(), OnGetPhotoInfoListener {
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         toggle.syncState()
         navigationView__mainActivity.setNavigationItemSelectedListener {
+            close()
             data.edit().remove("Token").apply()
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
@@ -47,14 +40,21 @@ class MainActivity : AppCompatActivity(), OnGetPhotoInfoListener {
         }
 
         recyclerView__mainActivity.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                loadPhotos()
+            override fun onScrollStateChanged(recyclerView: RecyclerView?, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (!recyclerView!!.canScrollVertically(1))
+                    loadPhotos()
             }
         })
         recyclerView__mainActivity.layoutManager = LinearLayoutManager(this)
 
-        GetPhotoInfo(token, this).execute()
+        infoGetter = Thread(PhotoInfoGetter(token, this))
+        infoGetter!!.start()
+    }
+
+    private fun close() {
+        adapter?.close()
+        infoGetter?.interrupt()
     }
 
     override fun onGetPhotoInfo(result: List<PhotoInfo>) {
@@ -64,7 +64,11 @@ class MainActivity : AppCompatActivity(), OnGetPhotoInfoListener {
     }
 
     private fun loadPhotos() {
-        adapter?.loadPhotos()
-        Log.i("MyYandex", "${adapter?.itemCount}")
+        adapter!!.loadPhotos()
+    }
+
+    override fun onDestroy() {
+        close()
+        super.onDestroy()
     }
 }

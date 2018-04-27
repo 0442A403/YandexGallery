@@ -6,12 +6,12 @@ import android.os.AsyncTask
 import android.os.Handler
 import com.bumptech.glide.Glide
 import java.util.*
-import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class PhotoManager(private val context: Context,
                    private val handler: Handler) : AsyncTask<Void, Void, Void>() {
-    private val requests: Queue<Pair<String, OnGetPhotoListener>> = LinkedList()
-    private val photos: ArrayList<Bitmap> = ArrayList()
+    private val requests: Queue<Triple<String, Int, OnPhotoDownloadedListener>> = LinkedList()
+    private val photos: HashMap<Int, Bitmap> = HashMap()
     override fun doInBackground(vararg params: Void?): Void? {
         while (true) {
             var isNotEmpty = false
@@ -19,9 +19,15 @@ class PhotoManager(private val context: Context,
                 isNotEmpty = requests.isNotEmpty()
             }
             if (isNotEmpty) {
-                var request: Pair<String, OnGetPhotoListener>? = null
+                var request: Triple<String, Int, OnPhotoDownloadedListener>? = null
                 synchronized(this) {
                     request = requests.poll()
+                }
+                if (photos.containsKey(request!!.second)) {
+                    handler.post {
+                        request!!.third.onPhotoDownloaded(photos[request!!.second]!!)
+                    }
+                    continue
                 }
                 val bitmap = Glide
                         .with(context)
@@ -29,20 +35,20 @@ class PhotoManager(private val context: Context,
                         .asBitmap()
                         .into(-1, -1)
                         .get()
-                photos.add(bitmap)
+                photos[request!!.second] = bitmap
                 handler.post {
-                    request!!.second.onGetPhoto(bitmap)
+                    request!!.third.onPhotoDownloaded(bitmap)
                 }
             }
 
         }
     }
 
-    fun addToQueue(link: String, callback: OnGetPhotoListener) {
+    fun isDone(): Boolean = requests.isEmpty()
+
+    fun setImageForHolder(callback: OnPhotoDownloadedListener, id: Int, link: String) {
         synchronized(this) {
-            requests.add(Pair(link, callback))
+            requests.add(Triple(link, id, callback))
         }
     }
-
-    fun isDone(): Boolean = requests.isEmpty()
 }
