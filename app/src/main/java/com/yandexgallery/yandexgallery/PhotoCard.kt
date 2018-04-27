@@ -1,19 +1,23 @@
 package com.yandexgallery.yandexgallery
 
-import android.content.Context
 import android.graphics.Bitmap
+import android.support.v7.widget.CardView
 import android.support.v7.widget.RecyclerView
+import android.view.View
 import android.view.ViewGroup
-import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.photo_card.view.*
 
-class PhotoCard(private val view: ViewGroup) : RecyclerView.ViewHolder(view), OnGetPhotoListener {
+class PhotoCard(private val view: ViewGroup) : RecyclerView.ViewHolder(view),
+        OnPhotoDownloadedListener {
 
-    override fun onGetPhoto(bitmap: Bitmap)
-            = view.photo_photoCard.setImageBitmap(bitmap)
+    override fun onPhotoDownloaded(bitmap: Bitmap) {
+        view.progressBarContainer_photoCard.visibility = View.GONE
+        view.photo_photoCard.visibility = View.VISIBLE
+        view.photo_photoCard.setImageBitmap(bitmap)
+    }
 
-    fun setData(data: PhotoInfo) {
-        view.date_photoCard.text = data.created
-        view.name_photoCard.text = data.name
+    fun setData(created: String, name: String) {
+        view.date_photoCard.text = created
+        view.name_photoCard.text = name
     }
 }
