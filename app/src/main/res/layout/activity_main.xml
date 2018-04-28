@@ -9,7 +9,7 @@
     tools:context=".MainActivity">
 
     <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar__mainActivity"
+        android:id="@+id/toolbar_mainActivity"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
@@ -19,33 +19,34 @@
         tools:ignore="UnusedAttribute" />
 
     <android.support.v4.widget.DrawerLayout
-        android:id="@+id/drawerLayout__mainActivity"
+        android:id="@+id/drawerLayout_mainActivity"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:openDrawer="start">
 
-        <LinearLayout
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/refreshLayout_mainActivity"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:orientation="vertical">
+            android:layout_height="match_parent">
 
             <android.support.v7.widget.RecyclerView
-                android:id="@+id/recyclerView__mainActivity"
+                android:id="@+id/recyclerView_mainActivity"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:paddingBottom="11dp"
+                android:clipToPadding="false"
+                android:scrollbars="vertical"/>
 
-        </LinearLayout>
+        </android.support.v4.widget.SwipeRefreshLayout>
 
         <android.support.design.widget.NavigationView
-            android:id="@+id/navigationViewContainer__mainActivity"
+            android:id="@+id/navigationViewContainer_mainActivity"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="start">
 
         <android.support.design.widget.NavigationView
-            android:id="@+id/navigationView__mainActivity"
+            android:id="@+id/navigationView_mainActivity"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"

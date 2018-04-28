@@ -9,6 +9,10 @@ import kotlinx.android.synthetic.main.photo_card.view.*
 
 class PhotoCard(private val view: ViewGroup) : RecyclerView.ViewHolder(view),
         OnPhotoDownloadedListener {
+    override fun onDownloadStarted() {
+        view.progressBarContainer_photoCard.visibility = View.VISIBLE
+        view.photo_photoCard.visibility = View.GONE
+    }
 
     override fun onPhotoDownloaded(bitmap: Bitmap) {
         view.progressBarContainer_photoCard.visibility = View.GONE

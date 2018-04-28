@@ -1,20 +1,20 @@
 package com.yandexgallery.yandexgallery
 
-import android.os.AsyncTask
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import com.squareup.okhttp.OkHttpClient
 import com.squareup.okhttp.Request
 import org.json.JSONObject
-import kotlin.collections.ArrayList
 
 class PhotoInfoGetter(private val token: String,
-                      private val callback: OnGetPhotoInfoListener) : Runnable {
+                      private val callback: OnGetPhotoInfoListener) : Thread() {
 
-    private val link = "https://cloud-api.yandex.net:443/v1/disk/resources/last-uploaded"
+    private val link = "https://cloud-api.yandex.net:443/v1/disk/resources/last-uploaded?" +
+            "fields=file,name,created,media_type,type"
     private val months = arrayListOf("Января", "Февраля", "Марта", "Апреля", "Мая",
             "Июня", "Июля", "Августа", "Сентября", "Октября", "Ноября", "Декабря")
+    private var isRunning = true
 
     override fun run() {
         val response = OkHttpClient()
@@ -22,6 +22,8 @@ class PhotoInfoGetter(private val token: String,
                         .addHeader("Authorization", token)
                         .url(link)
                         .build()).execute()
+        if (!isRunning)
+            return
         val array = JSONObject(response.body().string()).getJSONArray("items")
         Log.i("MyYandex", "YaResponse: $array")
         val res = ArrayList<PhotoInfo>()
@@ -34,8 +36,13 @@ class PhotoInfoGetter(private val token: String,
                         file["name"] as String))
         }
         Handler(Looper.getMainLooper()).post {
-            callback.onGetPhotoInfo(res)
+            if (isRunning)
+                callback.onGetPhotoInfo(res)
         }
+    }
+
+    fun close() {
+        isRunning = false
     }
 
     private fun decodeDay(str: String): String {

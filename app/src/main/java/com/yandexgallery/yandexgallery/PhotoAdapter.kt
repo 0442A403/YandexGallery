@@ -3,21 +3,21 @@ package com.yandexgallery.yandexgallery
 import android.content.Context
 import android.os.Handler
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import kotlin.math.min
 
 class PhotoAdapter(private val context: Context,
-                   private val info: List<PhotoInfo>,
-                   handler: Handler) : RecyclerView.Adapter<PhotoCard>() {
+                   private val info: List<PhotoInfo>) : RecyclerView.Adapter<PhotoCard>() {
     private var size: Int = 0
     private val photoPack = 10
     private val holders = ArrayList<PhotoCard>()
     private var lastDownload = -1L
-    private val photoManager = PhotoManager(context, handler)
-
+    private val photoManager = PhotoManager(context)
+    private val betweenDownloadsTime = 250
     init {
-        photoManager.execute()
+        photoManager.start()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PhotoCard {
@@ -32,22 +32,28 @@ class PhotoAdapter(private val context: Context,
     }
 
     override fun onBindViewHolder(holder: PhotoCard, position: Int) {
-        holder.setData(info[position].created, info[position].name)
-        photoManager.setImageForHolder(holder, position, info[position].link)
+        Log.i("MyYandex", "onBindViewHolder ${holder.adapterPosition} ${holder.layoutPosition} $position")
+        holder.setIsRecyclable(false)
+        holder.setData(info[holder.adapterPosition].created, info[holder.adapterPosition].name)
+        photoManager.setImageForHolder(holder,
+                holder.adapterPosition,
+                info[holder.adapterPosition].link)
     }
 
     override fun getItemCount(): Int = size
 
     fun loadPhotos() {
-        if (photoManager.isDone() && System.currentTimeMillis() - lastDownload >= 700) {
+        Log.i("MyYandex", "loadPhotos")
+        if (photoManager.isDone() && System.currentTimeMillis() - lastDownload
+                >= betweenDownloadsTime) {
             lastDownload = System.currentTimeMillis()
-            val oldSize = size
             size = min(size + photoPack, info.size)
-            notifyItemRangeChanged(oldSize, size - oldSize)
+            notifyDataSetChanged()
+            Log.i("MyYandex", "New size: $size")
         }
     }
 
     fun close() {
-        photoManager.cancel(false)
+        photoManager.close()
     }
 }
