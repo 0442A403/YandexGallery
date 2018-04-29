@@ -5,48 +5,49 @@ import android.graphics.Bitmap
 import android.os.AsyncTask
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import com.bumptech.glide.Glide
 import java.util.*
 import kotlin.collections.HashMap
+import kotlin.math.min
 
 class PhotoManager(private val context: Context,
-                   private val errorCallback: OnNetworkConnectionErrorListener) : Thread() {
-    private val requests: Queue<Triple<String, Int, OnPhotoDownloadedListener>> = LinkedList()
-    private val photos: HashMap<Int, Bitmap> = HashMap()
+                   private val errorCallback: OnNetworkConnectionErrorListener,
+                   private val presenters: List<DynamicPhotoPresenter>,
+                   data: List<PhotoInfo>) : Thread(), PhotoController {
+    init {
+        for (presenter in presenters)
+            presenter.setController(this)
+    }
+    private val photos: List<Photo> = List(data.size) {
+        i -> Photo(data[i].name, data[i].created, data[i].link)
+    }
     private var isRunning = true
+    private var size = 0
+    private var downloaded = 0
+    private val photoPack = 10
+    private var lastDownloadTime = -1L
+    private val betweenDownloadsTime = 350
     override fun run() {
         try {
-            while (isRunning) {
-                val isNotEmpty = requests.isNotEmpty()
-                if (isNotEmpty) {
-                    var request: Triple<String, Int, OnPhotoDownloadedListener>? = null
-                    synchronized(requests) {
-                        request = requests.poll()
-                    }
-                    var defined = false
-                    synchronized(photos) {
-                        defined = photos.containsKey(request!!.second)
-                    }
-                    if (defined) {
-                        runOnUI {
-                            request!!.third.onPhotoDownloaded(photos[request!!.second]!!)
-                        }
-                        continue
-                    }
-                    val bitmap = Glide
-                            .with(context)
-                            .load(request!!.first)
-                            .asBitmap()
-                            .into(-1, -1)
-                            .get()
-
-
-                    synchronized(photos) {
-                        photos[request!!.second] = bitmap
+            while (true) {
+                if (downloaded < size) {
+                    var index = downloaded
+                    val photo = photos[index]
+                    if (photo.bitmap == null) {
+                        val bitmap = Glide
+                                .with(context)
+                                .load(photo.link)
+                                .asBitmap()
+                                .into(-1, -1)
+                                .get()
+                        photo.bitmap = bitmap
                     }
                     runOnUI {
-                        request!!.third.onPhotoDownloaded(bitmap)
+                        for (callback in photo.callbacks.entries)
+                            callback.value.setPhoto(photo.bitmap)
                     }
+                    downloaded++
                 }
             }
         } catch (e : Exception) {
@@ -56,26 +57,24 @@ class PhotoManager(private val context: Context,
         }
     }
 
+    override fun setPhotoElement(presenterId: Int, photoElement: PhotoElement, position: Int) {
+        var photo = photos[position]
+        photoElement.setData(PhotoInfo(photo.date, photo.link, photo.name))
+        photos[position].callbacks[presenterId] = photoElement
+        photoElement.setPhoto(photos[position].bitmap)
+    }
+
     private fun runOnUI(body: () -> Unit) {
         Handler(Looper.getMainLooper()).post(body)
     }
 
-    fun isDone(): Boolean = requests.isEmpty()
-
-    fun setImageForHolder(callback: OnPhotoDownloadedListener, id: Int, link: String) {
-        var defined = false
-        synchronized(photos) {
-            defined = photos.containsKey(id)
-        }
-        if (defined) {
-            synchronized(photos) {
-                callback.onPhotoDownloaded(photos[id]!!)
-            }
-        }
-        else {
-            synchronized(requests) {
-                requests.add(Triple(link, id, callback))
-            }
+    fun loadNextPack() {
+        if (downloaded == size && System.currentTimeMillis() - lastDownloadTime
+                >= betweenDownloadsTime) {
+            lastDownloadTime = System.currentTimeMillis()
+                size = min(photos.size, size + photoPack)
+            for (presenter in presenters)
+                presenter.setSize(size)
         }
     }
 

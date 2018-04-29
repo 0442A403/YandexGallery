@@ -6,55 +6,31 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import kotlin.math.min
 
-class PhotoAdapter(private val context: Context,
-                   private val info: List<PhotoInfo>,
-                   private val errorCallback: OnNetworkConnectionErrorListener) :
-        RecyclerView.Adapter<PhotoCard>(),
-        OnNetworkConnectionErrorListener,
-        OnItemClickListener{
-    private var size: Int = 0
-    private val photoPack = 10
-    private var lastDownload = -1L
-    private val photoManager = PhotoManager(context, this)
-    private val betweenDownloadsTime = 250
-    init {
-        photoManager.start()
-    }
-
+class PhotoAdapter(private val context: Context, override val id: Int) :
+        RecyclerView.Adapter<PhotoCard>(), DynamicPhotoPresenter {
+    private var controller: PhotoController? = null
+    private var size = 0
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PhotoCard {
         val layout = LayoutInflater
                 .from(context)
                 .inflate(R.layout.photo_card, parent, false) as ViewGroup
-        return PhotoCard(layout, BitmapManager())
+        return PhotoCard(layout)
     }
 
     override fun onBindViewHolder(holder: PhotoCard, position: Int) {
         holder.setIsRecyclable(false)
-        holder.setData(info[position].created, info[position].name)
-        photoManager.setImageForHolder(holder.manager, position, info[position].link)
+        controller!!.setPhotoElement(id, holder, position)
     }
 
     override fun getItemCount(): Int = size
 
-    override fun onNetworkConnectionError() {
-        errorCallback.onNetworkConnectionError()
+    override fun setSize(newSize: Int) {
+        size = newSize
+        notifyDataSetChanged()
     }
 
-    override fun onItemClick(position: Int) {
-
-    }
-
-    fun loadPhotos() {
-        if (photoManager.isDone() && System.currentTimeMillis() - lastDownload
-                >= betweenDownloadsTime) {
-            lastDownload = System.currentTimeMillis()
-            val lastSize = size
-            size = min(size + photoPack, info.size)
-            notifyItemRangeInserted(lastSize, size - lastSize)
-        }
-    }
-
-    fun close() {
-        photoManager.close()
+    override fun setController(controller: PhotoController) {
+        if (this.controller == null)
+            this.controller = controller
     }
 }

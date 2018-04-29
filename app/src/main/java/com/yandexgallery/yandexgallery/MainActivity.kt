@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.ActionBarDrawerToggle
-import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.widget.Toast
@@ -12,8 +11,8 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : NetworkActivity(), OnGetPhotoInfoListener, OnNetworkConnectionErrorListener {
-    private var adapter: PhotoAdapter? = null
     private var infoGetter: PhotoInfoGetter? = null
+    private var photoManager: PhotoManager? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -66,7 +65,8 @@ class MainActivity : NetworkActivity(), OnGetPhotoInfoListener, OnNetworkConnect
     }
 
     private fun close() {
-        adapter?.close()
+        photoManager?.close()
+        photoManager = null
         infoGetter?.close()
         infoGetter = null
     }
@@ -77,15 +77,17 @@ class MainActivity : NetworkActivity(), OnGetPhotoInfoListener, OnNetworkConnect
 
     override fun onGetPhotoInfo(result: List<PhotoInfo>) {
         disableRefreshing()
-        adapter = PhotoAdapter(this, result, this)
+        val adapter = PhotoAdapter(this, 0)
         recyclerView_mainActivity.adapter = adapter
         recyclerView_mainActivity.layoutManager = LinearLayoutManager(this)
+        photoManager = PhotoManager(this, this, listOf(adapter), result)
+        photoManager!!.start()
         loadPhotos()
     }
 
     private fun loadPhotos() {
         if (hasConnection())
-            adapter?.loadPhotos()
+            photoManager?.loadNextPack()
         else
             Toast.makeText(this, "Проверьте подключение к интернету", Toast.LENGTH_SHORT).show()
     }
