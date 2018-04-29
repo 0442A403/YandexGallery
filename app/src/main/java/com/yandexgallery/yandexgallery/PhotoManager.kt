@@ -73,7 +73,6 @@ class PhotoManager(private val context: Context,
             }
         }
         else {
-            callback.onDownloadStarted()
             synchronized(requests) {
                 requests.add(Triple(link, id, callback))
             }

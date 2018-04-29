@@ -4,5 +4,4 @@ import android.graphics.Bitmap
 
 interface OnPhotoDownloadedListener {
     fun onPhotoDownloaded(bitmap: Bitmap)
-    fun onDownloadStarted()
 }
