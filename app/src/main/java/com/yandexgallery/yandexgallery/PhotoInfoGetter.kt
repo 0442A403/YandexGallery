@@ -8,7 +8,8 @@ import com.squareup.okhttp.Request
 import org.json.JSONObject
 
 class PhotoInfoGetter(private val token: String,
-                      private val callback: OnGetPhotoInfoListener) : Thread() {
+                      private val callback: OnGetPhotoInfoListener,
+                      private val errorCallback: OnNetworkConnectionErrorListener) : Thread() {
 
     private val link = "https://cloud-api.yandex.net:443/v1/disk/resources/last-uploaded?" +
             "fields=file,name,created,media_type,type"
@@ -17,28 +18,39 @@ class PhotoInfoGetter(private val token: String,
     private var isRunning = true
 
     override fun run() {
-        val response = OkHttpClient()
-                .newCall(Request.Builder()
-                        .addHeader("Authorization", token)
-                        .url(link)
-                        .build()).execute()
-        if (!isRunning)
-            return
-        val array = JSONObject(response.body().string()).getJSONArray("items")
-        Log.i("MyYandex", "YaResponse: $array")
-        val res = ArrayList<PhotoInfo>()
-        for (i in 0 until array.length()) {
-            val file = array.getJSONObject(i)
-            if (file.getString("type") == "file"
-                    && file.getString("media_type") == "image")
-                res.add(PhotoInfo(decodeDay(file["created"] as String),
-                        file["file"] as String,
-                        file["name"] as String))
+        try {
+            val response = OkHttpClient()
+                    .newCall(Request.Builder()
+                            .addHeader("Authorization", token)
+                            .url(link)
+                            .build()).execute()
+            if (!isRunning)
+                return
+            val array = JSONObject(response.body().string()).getJSONArray("items")
+            Log.i("MyYandex", "YaResponse: $array")
+            val res = ArrayList<PhotoInfo>()
+            for (i in 0 until array.length()) {
+                val file = array.getJSONObject(i)
+                if (file.getString("type") == "file"
+                        && file.getString("media_type") == "image")
+                    res.add(PhotoInfo(decodeDay(file["created"] as String),
+                            file["file"] as String,
+                            file["name"] as String))
+            }
+            runOnUI {
+                if (isRunning)
+                    callback.onGetPhotoInfo(res)
+            }
+        } catch (e : Exception) {
+            runOnUI {
+                errorCallback.onNetworkConnectionError()
+            }
         }
-        Handler(Looper.getMainLooper()).post {
-            if (isRunning)
-                callback.onGetPhotoInfo(res)
-        }
+
+    }
+
+    private fun runOnUI(body: () -> Unit) {
+        Handler(Looper.getMainLooper()).post(body)
     }
 
     fun close() {

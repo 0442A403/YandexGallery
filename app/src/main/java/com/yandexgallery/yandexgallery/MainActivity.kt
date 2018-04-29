@@ -7,10 +7,11 @@ import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 
 
-class MainActivity : AppCompatActivity(), OnGetPhotoInfoListener {
+class MainActivity : NetworkActivity(), OnGetPhotoInfoListener, OnNetworkConnectionErrorListener {
     private var adapter: PhotoAdapter? = null
     private var infoGetter: PhotoInfoGetter? = null
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,8 +55,14 @@ class MainActivity : AppCompatActivity(), OnGetPhotoInfoListener {
     }
 
     private fun getPhotoInfo(token: String) {
-        infoGetter = PhotoInfoGetter(token, this)
-        infoGetter!!.start()
+        if (hasConnection()) {
+            infoGetter = PhotoInfoGetter(token, this, this)
+            infoGetter!!.start()
+        }
+        else {
+            disableRefreshing()
+            noticeAboutNetwork()
+        }
     }
 
     private fun close() {
@@ -64,20 +71,31 @@ class MainActivity : AppCompatActivity(), OnGetPhotoInfoListener {
         infoGetter = null
     }
 
-    override fun onGetPhotoInfo(result: List<PhotoInfo>) {
+    private fun disableRefreshing() {
         refreshLayout_mainActivity!!.isRefreshing = false
-        adapter = PhotoAdapter(this, result)
+    }
+
+    override fun onGetPhotoInfo(result: List<PhotoInfo>) {
+        disableRefreshing()
+        adapter = PhotoAdapter(this, result, this)
         recyclerView_mainActivity.adapter = adapter
         recyclerView_mainActivity.layoutManager = LinearLayoutManager(this)
         loadPhotos()
     }
 
     private fun loadPhotos() {
-        adapter?.loadPhotos()
+        if (hasConnection())
+            adapter?.loadPhotos()
+        else
+            Toast.makeText(this, "Проверьте подключение к интернету", Toast.LENGTH_SHORT).show()
     }
 
     override fun onDestroy() {
         close()
         super.onDestroy()
+    }
+
+    override fun onNetworkConnectionError() {
+        noticeAboutNetwork()
     }
 }

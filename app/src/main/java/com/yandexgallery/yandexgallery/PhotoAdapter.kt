@@ -9,12 +9,14 @@ import android.view.ViewGroup
 import kotlin.math.min
 
 class PhotoAdapter(private val context: Context,
-                   private val info: List<PhotoInfo>) : RecyclerView.Adapter<PhotoCard>() {
+                   private val info: List<PhotoInfo>,
+                   private val errorCallback: OnNetworkConnectionErrorListener) :
+        RecyclerView.Adapter<PhotoCard>(), OnNetworkConnectionErrorListener{
     private var size: Int = 0
     private val photoPack = 10
     private val holders = ArrayList<PhotoCard>()
     private var lastDownload = -1L
-    private val photoManager = PhotoManager(context)
+    private val photoManager = PhotoManager(context, this)
     private val betweenDownloadsTime = 250
     init {
         photoManager.start()
@@ -32,7 +34,6 @@ class PhotoAdapter(private val context: Context,
     }
 
     override fun onBindViewHolder(holder: PhotoCard, position: Int) {
-        Log.i("MyYandex", "onBindViewHolder ${holder.adapterPosition} ${holder.layoutPosition} $position")
         holder.setIsRecyclable(false)
         holder.setData(info[holder.adapterPosition].created, info[holder.adapterPosition].name)
         photoManager.setImageForHolder(holder,
@@ -42,14 +43,16 @@ class PhotoAdapter(private val context: Context,
 
     override fun getItemCount(): Int = size
 
+    override fun onNetworkConnectionError() {
+        errorCallback.onNetworkConnectionError()
+    }
+
     fun loadPhotos() {
-        Log.i("MyYandex", "loadPhotos")
         if (photoManager.isDone() && System.currentTimeMillis() - lastDownload
                 >= betweenDownloadsTime) {
             lastDownload = System.currentTimeMillis()
             size = min(size + photoPack, info.size)
             notifyDataSetChanged()
-            Log.i("MyYandex", "New size: $size")
         }
     }
 

@@ -9,45 +9,55 @@ import com.bumptech.glide.Glide
 import java.util.*
 import kotlin.collections.HashMap
 
-class PhotoManager(private val context: Context) : Thread() {
+class PhotoManager(private val context: Context,
+                   private val errorCallback: OnNetworkConnectionErrorListener) : Thread() {
     private val requests: Queue<Triple<String, Int, OnPhotoDownloadedListener>> = LinkedList()
     private val photos: HashMap<Int, Bitmap> = HashMap()
     private var isRunning = true
     override fun run() {
-        super.run()
-        while (isRunning) {
-            val isNotEmpty = requests.isNotEmpty()
-            if (isNotEmpty) {
-                var request: Triple<String, Int, OnPhotoDownloadedListener>? = null
-                synchronized(requests) {
-                    request = requests.poll()
-                }
-                var defined = false
-                synchronized(photos) {
-                    defined = photos.containsKey(request!!.second)
-                }
-                if (defined) {
-                    Handler(Looper.getMainLooper()).post {
-                        request!!.third.onPhotoDownloaded(photos[request!!.second]!!)
+        try {
+            while (isRunning) {
+                val isNotEmpty = requests.isNotEmpty()
+                if (isNotEmpty) {
+                    var request: Triple<String, Int, OnPhotoDownloadedListener>? = null
+                    synchronized(requests) {
+                        request = requests.poll()
                     }
-                    continue
-                }
-                val bitmap = Glide
-                        .with(context)
-                        .load(request!!.first)
-                        .asBitmap()
-                        .into(-1, -1)
-                        .get()
+                    var defined = false
+                    synchronized(photos) {
+                        defined = photos.containsKey(request!!.second)
+                    }
+                    if (defined) {
+                        runOnUI {
+                            request!!.third.onPhotoDownloaded(photos[request!!.second]!!)
+                        }
+                        continue
+                    }
+                    val bitmap = Glide
+                            .with(context)
+                            .load(request!!.first)
+                            .asBitmap()
+                            .into(-1, -1)
+                            .get()
 
 
-                synchronized(photos) {
-                    photos[request!!.second] = bitmap
-                }
-                Handler(Looper.getMainLooper()).post {
-                    request!!.third.onPhotoDownloaded(bitmap)
+                    synchronized(photos) {
+                        photos[request!!.second] = bitmap
+                    }
+                    runOnUI {
+                        request!!.third.onPhotoDownloaded(bitmap)
+                    }
                 }
             }
+        } catch (e : Exception) {
+            runOnUI {
+                errorCallback.onNetworkConnectionError()
+            }
         }
+    }
+
+    private fun runOnUI(body: () -> Unit) {
+        Handler(Looper.getMainLooper()).post(body)
     }
 
     fun isDone(): Boolean = requests.isEmpty()

@@ -16,8 +16,7 @@ import android.webkit.CookieSyncManager
 import android.os.Build
 
 
-
-class LoginActivity : AppCompatActivity() {
+class LoginActivity : NetworkActivity(), OnNetworkConnectionErrorListener {
     private var webView: WebView? = null
     private val touchPadding = 10
     private val defaultPadding = 0
@@ -42,30 +41,33 @@ class LoginActivity : AppCompatActivity() {
         finish()
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
     fun login(v: View) {
-        clearCookies()
-        webView = webView_launcher
-        webView!!.clearCache(true)
-        contentContainer_launcher.visibility = View.GONE
-        webView_launcher.visibility = View.VISIBLE
-        webView!!.settings.javaScriptEnabled = true
-        webView!!.webViewClient = object: WebViewClient() {
-            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                super.onPageStarted(view, url, favicon)
-                if (url != null && url.contains("access_token")) {
-                    getSharedPreferences("AppData", Context.MODE_PRIVATE)
-                            .edit()
-                            .putString(
-                                    "Token",
-                                    url.split("access_token=")[1]
-                                            .split("&")[0])
-                            .apply()
-                    start()
+        if (hasConnection()) {
+            clearCookies()
+            webView = webView_launcher
+            webView!!.clearCache(true)
+            contentContainer_launcher.visibility = View.GONE
+            webView_launcher.visibility = View.VISIBLE
+            webView!!.webViewClient = object : WebViewClient() {
+                override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                    super.onPageStarted(view, url, favicon)
+                    if (url != null && url.contains("access_token")) {
+                        getSharedPreferences("AppData", Context.MODE_PRIVATE)
+                                .edit()
+                                .putString(
+                                        "Token",
+                                        url.split("access_token=")[1]
+                                                .split("&")[0])
+                                .apply()
+                        start()
+                    }
                 }
             }
+            webView!!.loadUrl(getString(R.string.OAuthURL))
         }
-        webView!!.loadUrl(getString(R.string.OAuthURL))
+        else {
+            noticeAboutNetwork()
+        }
     }
 
     override fun onBackPressed() {
@@ -81,6 +83,10 @@ class LoginActivity : AppCompatActivity() {
                 webView_launcher.visibility = View.GONE
             }
         }
+    }
+
+    override fun onNetworkConnectionError() {
+        noticeAboutNetwork()
     }
 
     private fun clearCookies() {
