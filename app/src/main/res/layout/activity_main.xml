@@ -43,18 +43,12 @@
 
             </android.support.v4.widget.SwipeRefreshLayout>
 
-            <RelativeLayout
+            <android.support.v4.view.ViewPager
                 android:id="@+id/photoSlider_mainActivity"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@color/black"
-                android:visibility="gone">
-
-                <android.support.v4.view.ViewPager
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
-
-            </RelativeLayout>
+                android:visibility="gone"/>
 
         </FrameLayout>
 
@@ -64,14 +58,14 @@
             android:layout_height="match_parent"
             android:layout_gravity="start">
 
-        <android.support.design.widget.NavigationView
-            android:id="@+id/navigationView_mainActivity"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            app:menu="@menu/navigation"
-            app:itemTextColor="@color/black"
-            app:elevation="0dp" />
+            <android.support.design.widget.NavigationView
+                android:id="@+id/navigationView_mainActivity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                app:menu="@menu/navigation"
+                app:itemTextColor="@color/black"
+                app:elevation="0dp" />
 
         </android.support.design.widget.NavigationView>
 

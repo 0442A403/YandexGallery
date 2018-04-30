@@ -6,13 +6,17 @@ import android.os.Bundle
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.view.View
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 
 
-class MainActivity : NetworkActivity(), OnGetPhotoInfoListener, OnNetworkConnectionErrorListener {
+class MainActivity :
+        NetworkActivity(), OnGetPhotoInfoListener,
+        OnNetworkConnectionErrorListener, OnItemClickListener {
     private var infoGetter: PhotoInfoGetter? = null
     private var photoManager: PhotoManager? = null
+    private var sliderEnable = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -77,10 +81,18 @@ class MainActivity : NetworkActivity(), OnGetPhotoInfoListener, OnNetworkConnect
 
     override fun onGetPhotoInfo(result: List<PhotoInfo>) {
         disableRefreshing()
-        val adapter = PhotoAdapter(this, 0)
-        recyclerView_mainActivity.adapter = adapter
+        val cardAdapter = PhotoAdapter(this, 0)
+        recyclerView_mainActivity.adapter = cardAdapter
         recyclerView_mainActivity.layoutManager = LinearLayoutManager(this)
-        photoManager = PhotoManager(this, this, listOf(adapter), result)
+        val slideAdapter = PhotoSlider(1, supportFragmentManager)
+        photoSlider_mainActivity.adapter = slideAdapter
+        photoManager = PhotoManager(
+                this,
+                this,
+                listOf(cardAdapter, slideAdapter),
+                this,
+                result
+        )
         photoManager!!.start()
         loadPhotos()
     }
@@ -89,7 +101,28 @@ class MainActivity : NetworkActivity(), OnGetPhotoInfoListener, OnNetworkConnect
         if (hasConnection())
             photoManager?.loadNextPack()
         else
-            Toast.makeText(this, "Проверьте подключение к интернету", Toast.LENGTH_SHORT).show()
+            Toast
+                    .makeText(this, "Проверьте подключение к интернету", Toast.LENGTH_SHORT)
+                    .show()
+    }
+
+    override fun onItemClick(position: Int) {
+        photoSlider_mainActivity.currentItem = position
+        photoSlider_mainActivity.visibility = View.VISIBLE
+        refreshLayout_mainActivity.visibility = View.GONE
+        supportActionBar!!.setDisplayShowHomeEnabled(true)
+        sliderEnable = true
+    }
+
+    override fun onBackPressed() {
+        if (!sliderEnable)
+            super.onBackPressed()
+        else {
+            photoSlider_mainActivity.visibility = View.GONE
+            refreshLayout_mainActivity.visibility = View.VISIBLE
+            supportActionBar!!.setDisplayShowHomeEnabled(false)
+            sliderEnable = false
+        }
     }
 
     override fun onDestroy() {

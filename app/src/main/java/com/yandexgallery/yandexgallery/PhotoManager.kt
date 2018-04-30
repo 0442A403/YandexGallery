@@ -6,6 +6,7 @@ import android.os.AsyncTask
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.widget.ImageView
 import com.bumptech.glide.Glide
 import java.util.*
 import kotlin.collections.HashMap
@@ -14,6 +15,7 @@ import kotlin.math.min
 class PhotoManager(private val context: Context,
                    private val errorCallback: OnNetworkConnectionErrorListener,
                    private val presenters: List<DynamicPhotoPresenter>,
+                   private val onItemClickListener: OnItemClickListener,
                    data: List<PhotoInfo>) : Thread(), PhotoController {
     init {
         for (presenter in presenters)
@@ -62,6 +64,10 @@ class PhotoManager(private val context: Context,
         photoElement.setData(PhotoInfo(photo.date, photo.link, photo.name))
         photos[position].callbacks[presenterId] = photoElement
         photoElement.setPhoto(photos[position].bitmap)
+    }
+
+    override fun onItemClick(position: Int) {
+        onItemClickListener.onItemClick(position)
     }
 
     private fun runOnUI(body: () -> Unit) {
