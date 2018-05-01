@@ -8,84 +8,100 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <LinearLayout
+
+    <android.support.v4.widget.DrawerLayout
         android:id="@+id/lenta_mode"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        tools:openDrawer="start">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/lentaToolbar_mainActivity"
+        <android.support.design.widget.CoordinatorLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/colorPrimary"
-            android:elevation="2dp"
-            app:title="@string/my_lenta"
-            app:titleTextColor="@color/textColorPrimary"
-            tools:ignore="UnusedAttribute" />
+            android:layout_height="match_parent">
 
-        <android.support.v4.widget.DrawerLayout
-            android:id="@+id/drawerLayout_mainActivity"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:openDrawer="start">
-
-            <FrameLayout
+            <android.support.design.widget.AppBarLayout
+                android:id="@+id/toolbarContainer_activityMain"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="wrap_content"
+                app:elevation="0dp"
+                tools:ignore="UnusedAttribute">
+
+                <android.support.v7.widget.Toolbar
+                    android:id="@+id/lentaToolbar_mainActivity"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    app:layout_collapseMode="pin"
+                    app:layout_scrollFlags="scroll|enterAlways"
+                    android:background="@color/colorPrimary"
+                    app:title="@string/my_photos"
+                    app:elevation="0dp"
+                    app:titleTextColor="@color/textColorPrimary" />
+
+            </android.support.design.widget.AppBarLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+                <android.support.design.widget.TabLayout
+                    android:id="@+id/tabLayout_mainActivity"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/white"
+                    app:layout_scrollFlags="scroll|enterAlways"
+                    app:elevation="5dp"
+                    app:tabMode="fixed"
+                    tools:ignore="UnusedAttribute" />
 
                 <android.support.v4.widget.SwipeRefreshLayout
                     android:id="@+id/refreshLayout_mainActivity"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
-                    <android.support.v7.widget.RecyclerView
-                        android:id="@+id/recyclerView_mainActivity"
+                    <android.support.v4.view.ViewPager
+                        android:id="@+id/viewPager_mainActivity"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingBottom="11dp"
-                        android:clipToPadding="false"
-                        android:scrollbars="vertical"/>
+                        android:layout_height="match_parent" />
 
                 </android.support.v4.widget.SwipeRefreshLayout>
 
-            </FrameLayout>
+            </LinearLayout>
+
+        </android.support.design.widget.CoordinatorLayout>
+
+        <android.support.design.widget.NavigationView
+            android:id="@+id/navigationViewContainer_mainActivity"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="start">
 
             <android.support.design.widget.NavigationView
-                android:id="@+id/navigationViewContainer_mainActivity"
+                android:id="@+id/navigationView_mainActivity"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="start">
-
-                <android.support.design.widget.NavigationView
-                    android:id="@+id/navigationView_mainActivity"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
-                    app:menu="@menu/navigation"
-                    app:itemTextColor="@color/black"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                app:menu="@menu/navigation"
+                app:itemTextColor="@color/black"
                     app:elevation="0dp" />
 
             </android.support.design.widget.NavigationView>
 
-        </android.support.v4.widget.DrawerLayout>
+    </android.support.v4.widget.DrawerLayout>
 
-    </LinearLayout>
-
-    <LinearLayout
+    <FrameLayout
         android:id="@+id/slider_mode"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
-        android:orientation="vertical">
+        android:visibility="gone">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/sliderToolbar_mainActivity"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/black"
+            android:background="@color/transparent"
             android:elevation="2dp"
-            app:title="@string/my_lenta"
             app:titleTextColor="@color/white"
             tools:ignore="UnusedAttribute"
             android:theme="@style/SlideToolbarTheme" />
@@ -96,6 +112,6 @@
             android:layout_height="match_parent"
             android:background="@color/black" />
 
-    </LinearLayout>
+    </FrameLayout>
 
 </FrameLayout>

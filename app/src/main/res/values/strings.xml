@@ -7,4 +7,5 @@
     <string name="appId">f4a1654a4cde40b2858380e2e89e6385</string>
     <string name="OAuthURL">https://oauth.yandex.ru/authorize?response_type=token&amp;client_id=f4a1654a4cde40b2858380e2e89e6385</string>
     <string name="exit">Выйти</string>
+    <string name="my_photos">Мои фотографии</string>
 </resources>

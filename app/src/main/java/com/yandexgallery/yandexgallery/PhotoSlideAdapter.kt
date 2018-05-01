@@ -5,10 +5,11 @@ import android.support.v4.view.ViewPager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.github.chrisbanes.photoview.PhotoView
 
-class PhotoSlider(override val id: Int,
-                  private val inflater: LayoutInflater,
-                  private val pager: ViewPager) :
+class PhotoSlideAdapter(override val id: Int,
+                        private val inflater: LayoutInflater,
+                        private val pager: ViewPager) :
         PagerAdapter(), DynamicPhotoPresenter {
 
     private var controller: PhotoController? = null
@@ -30,6 +31,8 @@ class PhotoSlider(override val id: Int,
     }
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
+        val photoView = PhotoView(container.context)
+        slides[position].setPhotoView(photoView)
         val view = slides[position].slide
         container.addView(view)
         return view
@@ -58,5 +61,10 @@ class PhotoSlider(override val id: Int,
 
     override fun destroyItem(container: ViewGroup, position: Int, `object`: Any) {
         container.removeView(slides[position].slide)
+    }
+
+    fun clearScaling() {
+        for (slide in slides)
+            slide.clearScaling()
     }
 }

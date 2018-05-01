@@ -27,7 +27,7 @@ class PhotoManager(private val context: Context,
     private var isRunning = true
     private var size = 0
     private var downloaded = 0
-    private val photoPack = 10
+    private val photoPack = 9
     private var lastDownloadTime = -1L
     private val betweenDownloadsTime = 350
     override fun run() {

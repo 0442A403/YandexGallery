@@ -8,7 +8,7 @@
     android:background="@color/black">
 
 
-    <ImageView
+    <com.github.chrisbanes.photoview.PhotoView
         android:id="@+id/photo_photoSlide"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -18,8 +18,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginBottom="35dp"
-        android:layout_marginTop="35dp"/>
+        android:scaleType="centerInside" />
 
     <ProgressBar
         android:id="@+id/progressBar_photoSlide"
@@ -34,17 +33,17 @@
         android:id="@+id/name_photoSlide"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:layout_marginBottom="8dp"
         android:ellipsize="end"
         android:maxLines="1"
         android:textColor="@color/white"
-        android:textSize="20sp"
+        android:textSize="21sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"
-        app:layout_goneMarginBottom="10dp"/>
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="15dp"
+        android:paddingTop="8dp"
+        android:background="@color/transparent" />
 
 </android.support.constraint.ConstraintLayout>

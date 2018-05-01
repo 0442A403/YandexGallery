@@ -11,4 +11,5 @@
     <color name="yandexYellowDark">#FFBA00</color>
     <color name="black">#000000</color>
     <color name="lightGray">#666666</color>
+    <color name="transparent">#22000000</color>
 </resources>

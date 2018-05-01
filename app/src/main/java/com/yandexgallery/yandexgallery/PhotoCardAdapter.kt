@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import kotlinx.android.synthetic.main.photo_card.view.*
 import kotlin.math.min
 
-class PhotoAdapter(private val context: Context, override val id: Int) :
+class PhotoCardAdapter(private val context: Context, override val id: Int) :
         RecyclerView.Adapter<PhotoCard>(), DynamicPhotoPresenter, OnItemClickListener {
     private var controller: PhotoController? = null
     private var size = 0

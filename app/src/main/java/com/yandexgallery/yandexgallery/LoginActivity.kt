@@ -30,6 +30,8 @@ class LoginActivity : NetworkActivity(), OnNetworkConnectionErrorListener {
                                 touchPadding,
                                 touchPadding,
                                 touchPadding)
+            else if (event.action == MotionEvent.ACTION_UP)
+                yandexLogoContainer__launcher.setPadding(0, 0, 0, 0)
             super.onTouchEvent(event)
         }
     }
