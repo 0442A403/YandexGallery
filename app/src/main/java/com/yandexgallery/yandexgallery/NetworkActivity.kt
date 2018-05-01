@@ -23,7 +23,7 @@ open class NetworkActivity : AppCompatActivity() {
                 || wifiConnectionState == NetworkInfo.State.CONNECTED
     }
 
-    protected fun noticeAboutNetwork() {
+    protected fun noticeAboutBadNetwork() {
         Toast.makeText(this, "Проверьте подключение к интернету", Toast.LENGTH_SHORT).show()
     }
 }

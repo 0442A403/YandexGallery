@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -8,67 +8,94 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar_mainActivity"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
-        android:elevation="2dp"
-        app:title="@string/my_lenta"
-        app:titleTextColor="@color/textColorPrimary"
-        tools:ignore="UnusedAttribute" />
-
-    <android.support.v4.widget.DrawerLayout
-        android:id="@+id/drawerLayout_mainActivity"
+    <LinearLayout
+        android:id="@+id/lenta_mode"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:openDrawer="start">
+        android:orientation="vertical">
 
-        <FrameLayout
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/lentaToolbar_mainActivity"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            android:elevation="2dp"
+            app:title="@string/my_lenta"
+            app:titleTextColor="@color/textColorPrimary"
+            tools:ignore="UnusedAttribute" />
 
-            <android.support.v4.widget.SwipeRefreshLayout
-                android:id="@+id/refreshLayout_mainActivity"
+        <android.support.v4.widget.DrawerLayout
+            android:id="@+id/drawerLayout_mainActivity"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:openDrawer="start">
+
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-                <android.support.v7.widget.RecyclerView
-                    android:id="@+id/recyclerView_mainActivity"
+                <android.support.v4.widget.SwipeRefreshLayout
+                    android:id="@+id/refreshLayout_mainActivity"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingBottom="11dp"
-                    android:clipToPadding="false"
-                    android:scrollbars="vertical"/>
+                    android:layout_height="match_parent">
 
-            </android.support.v4.widget.SwipeRefreshLayout>
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/recyclerView_mainActivity"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingBottom="11dp"
+                        android:clipToPadding="false"
+                        android:scrollbars="vertical"/>
 
-            <android.support.v4.view.ViewPager
-                android:id="@+id/photoSlider_mainActivity"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/black"
-                android:visibility="gone"/>
+                </android.support.v4.widget.SwipeRefreshLayout>
 
-        </FrameLayout>
-
-        <android.support.design.widget.NavigationView
-            android:id="@+id/navigationViewContainer_mainActivity"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="start">
+            </FrameLayout>
 
             <android.support.design.widget.NavigationView
-                android:id="@+id/navigationView_mainActivity"
+                android:id="@+id/navigationViewContainer_mainActivity"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                app:menu="@menu/navigation"
-                app:itemTextColor="@color/black"
-                app:elevation="0dp" />
+                android:layout_height="match_parent"
+                android:layout_gravity="start">
 
-        </android.support.design.widget.NavigationView>
+                <android.support.design.widget.NavigationView
+                    android:id="@+id/navigationView_mainActivity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    app:menu="@menu/navigation"
+                    app:itemTextColor="@color/black"
+                    app:elevation="0dp" />
 
-    </android.support.v4.widget.DrawerLayout>
+            </android.support.design.widget.NavigationView>
 
-</LinearLayout>
+        </android.support.v4.widget.DrawerLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/slider_mode"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:orientation="vertical">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/sliderToolbar_mainActivity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/black"
+            android:elevation="2dp"
+            app:title="@string/my_lenta"
+            app:titleTextColor="@color/white"
+            tools:ignore="UnusedAttribute"
+            android:theme="@style/SlideToolbarTheme" />
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/photoSlider_mainActivity"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/black" />
+
+    </LinearLayout>
+
+</FrameLayout>

@@ -1,11 +1,9 @@
 package com.yandexgallery.yandexgallery
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.view.MotionEvent
 import android.view.View
 import android.webkit.CookieManager
@@ -66,7 +64,7 @@ class LoginActivity : NetworkActivity(), OnNetworkConnectionErrorListener {
             webView!!.loadUrl(getString(R.string.OAuthURL))
         }
         else {
-            noticeAboutNetwork()
+            noticeAboutBadNetwork()
         }
     }
 
@@ -86,7 +84,7 @@ class LoginActivity : NetworkActivity(), OnNetworkConnectionErrorListener {
     }
 
     override fun onNetworkConnectionError() {
-        noticeAboutNetwork()
+        noticeAboutBadNetwork()
     }
 
     private fun clearCookies() {

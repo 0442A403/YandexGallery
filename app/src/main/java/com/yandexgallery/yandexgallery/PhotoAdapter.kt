@@ -8,22 +8,19 @@ import kotlinx.android.synthetic.main.photo_card.view.*
 import kotlin.math.min
 
 class PhotoAdapter(private val context: Context, override val id: Int) :
-        RecyclerView.Adapter<PhotoCard>(), DynamicPhotoPresenter {
+        RecyclerView.Adapter<PhotoCard>(), DynamicPhotoPresenter, OnItemClickListener {
     private var controller: PhotoController? = null
     private var size = 0
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PhotoCard {
         val layout = LayoutInflater
                 .from(context)
                 .inflate(R.layout.photo_card, parent, false) as ViewGroup
-        return PhotoCard(layout)
+        return PhotoCard(layout, this)
     }
 
     override fun onBindViewHolder(holder: PhotoCard, position: Int) {
         holder.setIsRecyclable(false)
         controller!!.setPhotoElement(id, holder, position)
-        holder.itemView.photo_photoCard.setOnClickListener {
-            controller?.onItemClick(position)
-        }
     }
 
     override fun getItemCount(): Int = size
@@ -36,5 +33,9 @@ class PhotoAdapter(private val context: Context, override val id: Int) :
     override fun setController(controller: PhotoController) {
         if (this.controller == null)
             this.controller = controller
+    }
+
+    override fun onItemClick(position: Int) {
+        controller?.onItemClick(position)
     }
 }
