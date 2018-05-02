@@ -7,32 +7,27 @@ import android.support.v4.app.FragmentPagerAdapter
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.view.LayoutInflater
-import kotlinx.android.synthetic.main.grid_lenta.view.*
-import kotlinx.android.synthetic.main.lenta_layout.*
+import kotlinx.android.synthetic.main.grid_lenta.*
+import kotlinx.android.synthetic.main.linear_lenta.*
+import android.opengl.ETC1.getHeight
+
+
 
 class LentaAdapter(fragmentManager: FragmentManager,
-                   private val loader: PhotoLoader) : FragmentPagerAdapter(fragmentManager) {
+                   private val loader: PhotoLoader,
+                   private val onItemCreateListener: OnItemCreateListener,
+                   private val onItemClickListener: OnItemClickListener) :
+        FragmentPagerAdapter(fragmentManager), OnItemCreateListener, OnItemClickListener{
 
-    private val size = 2
-    private var gridLenta: GridLenta? = null
-    private var recyclerLenta: RecyclerLenta? = null
+    val size = 2
+    private val gridLentaFragment: GridLentaFragment = GridLentaFragment()
+    private val linearLentaFragment: LinearLentaFragment = LinearLentaFragment()
+    private var gridLentaAdapter: GridLentaAdapter? = null
+    private var linearLentaAdapter: LinearLentaAdapter? = null
 
-    init {
-        gridLenta = GridLenta()
-        recyclerLenta = RecyclerLenta()
-    }
-
-    override fun getItem(position: Int): Fragment
-            = when (position) {
-        0 -> {
-            gridLenta = GridLenta()
-            gridLenta!!
-        }
-        else ->  {
-            recyclerLenta = RecyclerLenta()
-            recyclerLenta!!
-        }
+    override fun getItem(position: Int): Fragment = when (position) {
+        0 -> gridLentaFragment
+        else -> linearLentaFragment
     }
 
     override fun getCount(): Int = size
@@ -43,8 +38,26 @@ class LentaAdapter(fragmentManager: FragmentManager,
     else
         "Подробно"
 
-    fun setUpRecyclerView(context: Context) : DynamicPhotoPresenter {
-        val recyclerView = recyclerLenta!!.recyclerLenta
+    override fun onItemCreate(presenterId: Int, listener: OnBitmapChangeListener, position: Int) {
+        onItemCreateListener.onItemCreate(presenterId, listener, position)
+    }
+
+    override fun onItemClick(position: Int) {
+        onItemClickListener.onItemClick(position)
+    }
+
+    fun setPhotoSize(newSize: Int) {
+        gridLentaAdapter!!.size = newSize
+        linearLentaAdapter!!.size = newSize
+    }
+
+    fun setup(context: Context, data: List<PhotoInfo>) {
+        setupLinearLenta(context, data)
+        setupGridLenta(context)
+    }
+
+    private fun setupLinearLenta(context: Context, data: List<PhotoInfo>) {
+        val recyclerView = linearLentaFragment.linearLenta
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView?, newState: Int) {
@@ -53,13 +66,12 @@ class LentaAdapter(fragmentManager: FragmentManager,
                     loader.loadPhotos()
             }
         })
-        val cardAdapter = PhotoCardAdapter(context, 0)
-        recyclerView.adapter = cardAdapter
-        return cardAdapter
+        linearLentaAdapter = LinearLentaAdapter(context, 0, this, this, data)
+        recyclerView.adapter = linearLentaAdapter
     }
 
-    fun setUpGridView(context: Context): DynamicPhotoPresenter {
-        val recyclerView = gridLenta!!.recyclerLenta
+    private fun setupGridLenta(context: Context) {
+        val recyclerView = gridLentaFragment.gridLenta
         recyclerView.layoutManager = GridLayoutManager(context, 3)
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView?, newState: Int) {
@@ -68,11 +80,13 @@ class LentaAdapter(fragmentManager: FragmentManager,
                     loader.loadPhotos()
             }
         })
-        val gridAdapter = PhotoGridAdapter(context, 0)
-        recyclerView.adapter = gridAdapter
-        return gridAdapter
+        gridLentaAdapter = GridLentaAdapter(context, 0, this, this)
+        recyclerView.adapter = gridLentaAdapter
+        recyclerView.viewTreeObserver.addOnGlobalLayoutListener {
+            val viewHeight = recyclerView.measuredHeight
+        }
     }
 
-    fun hasNotScrollable(): Boolean = !gridLenta!!.recyclerLenta.isVerticalScrollBarEnabled ||
-            !recyclerLenta!!.recyclerLenta.isVerticalScrollBarEnabled
+    fun hasNotScrollable(): Boolean
+            = !gridLentaFragment.notScrollable() || linearLentaFragment.notScrollable()
 }

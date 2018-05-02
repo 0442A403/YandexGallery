@@ -7,10 +7,19 @@ import android.view.ViewGroup
 import kotlinx.android.synthetic.main.photo_card.view.*
 import kotlin.math.min
 
-class PhotoCardAdapter(private val context: Context, override val id: Int) :
-        RecyclerView.Adapter<PhotoCard>(), DynamicPhotoPresenter, OnItemClickListener {
-    private var controller: PhotoController? = null
-    private var size = 0
+class LinearLentaAdapter(private val context: Context,
+                         override val id: Int,
+                         private val onItemClickListener: OnItemClickListener,
+                         private val onItemCreateListener: OnItemCreateListener,
+                         private val data: List<PhotoInfo>) :
+        RecyclerView.Adapter<PhotoCard>(), PhotoPresenter, OnItemClickListener {
+
+    var size = 0
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PhotoCard {
         val layout = LayoutInflater
                 .from(context)
@@ -20,22 +29,13 @@ class PhotoCardAdapter(private val context: Context, override val id: Int) :
 
     override fun onBindViewHolder(holder: PhotoCard, position: Int) {
         holder.setIsRecyclable(false)
-        controller!!.setPhotoElement(id, holder, position)
+        holder.setData(data[position].created, data[position].name)
+        onItemCreateListener.onItemCreate(id, holder, position)
     }
 
     override fun getItemCount(): Int = size
 
-    override fun setSize(newSize: Int) {
-        size = newSize
-        notifyDataSetChanged()
-    }
-
-    override fun setController(controller: PhotoController) {
-        if (this.controller == null)
-            this.controller = controller
-    }
-
     override fun onItemClick(position: Int) {
-        controller?.onItemClick(position)
+        onItemClickListener.onItemClick(position)
     }
 }

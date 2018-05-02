@@ -106,7 +106,7 @@
             tools:ignore="UnusedAttribute"
             android:theme="@style/SlideToolbarTheme" />
 
-        <android.support.v4.view.ViewPager
+        <com.yandexgallery.yandexgallery.ViewPagerFixed
             android:id="@+id/photoSlider_mainActivity"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

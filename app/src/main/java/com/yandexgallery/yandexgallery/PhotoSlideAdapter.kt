@@ -9,12 +9,27 @@ import com.github.chrisbanes.photoview.PhotoView
 
 class PhotoSlideAdapter(override val id: Int,
                         private val inflater: LayoutInflater,
-                        private val pager: ViewPager) :
-        PagerAdapter(), DynamicPhotoPresenter {
+                        private val pager: ViewPager,
+                        private val names: List<String>,
+                        private val onItemCreateListener: OnItemCreateListener) :
+        PagerAdapter(), PhotoPresenter {
 
-    private var controller: PhotoController? = null
-    private var size = 0
     private val slides: ArrayList<PhotoSlide> = ArrayList()
+    var size = 0
+        set(value) {
+            val oldSize = size
+            field = value
+            for (i in oldSize until value) {
+                val slideView = inflater.inflate(R.layout.photo_slide, pager, false) as ViewGroup
+                val slide = PhotoSlide(slideView)
+                slide.setData(names[i])
+                onItemCreateListener.onItemCreate(id, slide, i)
+                slides.add(slide)
+            }
+            notifyDataSetChanged()
+        }
+
+
 
     override fun getCount(): Int
             = size
@@ -31,28 +46,10 @@ class PhotoSlideAdapter(override val id: Int,
     }
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
-        val photoView = PhotoView(container.context)
-        slides[position].setPhotoView(photoView)
         val view = slides[position].slide
+//        onItemCreateListener.onItemCreate(id, slides[position], position)
         container.addView(view)
         return view
-    }
-
-    override fun setSize(newSize: Int) {
-        val oldSize = size
-        size = newSize
-        for (i in oldSize until size) {
-            val slideView = inflater.inflate(R.layout.photo_slide, pager, false) as ViewGroup
-            val slide = PhotoSlide(slideView)
-            slides.add(slide)
-            controller!!.setPhotoElement(id, slide, i)
-        }
-        notifyDataSetChanged()
-    }
-
-    override fun setController(controller: PhotoController) {
-        if (this.controller == null)
-            this.controller = controller
     }
 
     override fun getPageTitle(position: Int): CharSequence? {
@@ -64,7 +61,7 @@ class PhotoSlideAdapter(override val id: Int,
     }
 
     fun clearScaling() {
-        for (slide in slides)
-            slide.clearScaling()
+//        for (slide in slides)
+//            slide.clearScaling()
     }
 }

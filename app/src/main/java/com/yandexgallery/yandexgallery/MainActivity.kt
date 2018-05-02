@@ -1,7 +1,6 @@
 package com.yandexgallery.yandexgallery
 
 import android.content.Context
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -9,24 +8,22 @@ import android.os.Looper
 import android.support.v4.content.ContextCompat
 import android.support.v4.view.ViewPager
 import android.support.v7.app.ActionBarDrawerToggle
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
-import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity :
-        NetworkActivity(), OnGetPhotoInfoListener,
-        OnNetworkConnectionErrorListener, OnItemClickListener, PhotoLoader {
+        NetworkActivity(), OnGetPhotoInfoListener, OnNetworkConnectionErrorListener,
+        OnItemClickListener, OnItemCreateListener, OnSizeChangeListener, PhotoLoader {
 
     private var infoGetter: PhotoInfoGetter? = null
     private var photoManager: PhotoManager? = null
     private var sliderEnable = false
     private var slideAdapter: PhotoSlideAdapter? = null
     private var lentaAdapter: LentaAdapter? = null
-    private var autoLoaderWorking = false
+//    private var autoLoaderWorking = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,6 +39,7 @@ class MainActivity :
     }
 
     override fun onItemClick(position: Int) {
+        Log.i("MyYandex", "$position")
         enableSlider(position)
     }
 
@@ -63,7 +61,7 @@ class MainActivity :
         noticeAboutBadNetwork()
     }
 
-    private fun setPagerTitle(position: Int) {
+    private fun setSliderTitle(position: Int) {
         sliderToolbar_mainActivity.title = photoSlider_mainActivity.adapter!!.getPageTitle(position)
     }
 
@@ -91,49 +89,42 @@ class MainActivity :
 
     override fun onGetPhotoInfo(result: List<PhotoInfo>) {
         disableRefreshing()
-        val presenters = setUpAdapters(photoSlider_mainActivity)
-        setUpPhotoManager(presenters, result)
-        autoLoaderWorking = true
-        Thread {
-            while (lentaAdapter == null && autoLoaderWorking);
-            while (lentaAdapter!!.hasNotScrollable() && autoLoaderWorking) {
-                Thread.sleep(250)
-                Handler(Looper.getMainLooper()).post {
-                    loadPhotos()
-                }
-            }
-            autoLoaderWorking = false
-        }.start()
+        setUpAdapters(result, photoSlider_mainActivity)
+        setUpPhotoManager(result.map { i -> i.link })
+        loadPhotos()
     }
 
     override fun loadPhotos() {
         if (hasConnection())
-            photoManager?.loadNextPack()
+            photoManager?.loadNext()
         else
             noticeAboutBadNetwork()
     }
 
-    private fun setUpAdapters(slider: ViewPager): List<DynamicPhotoPresenter> {
-        val recyclerAdapter = lentaAdapter!!.setUpRecyclerView(this)
-        val gridAdapter = lentaAdapter!!.setUpGridView(this)
-        val sliderAdapter = setUpSlider(slider)
-        return listOf(recyclerAdapter, gridAdapter, slideAdapter!!)
+    private fun setUpAdapters(data: List<PhotoInfo>, slider: ViewPager) {
+        lentaAdapter!!.setup(this, data)
+        val sliderAdapter = setUpSlider(slider, data.map { i -> i.name })
     }
 
     private fun setUpViewPager(viewPager: ViewPager) {
-        lentaAdapter = LentaAdapter(supportFragmentManager, this)
+        lentaAdapter = LentaAdapter(supportFragmentManager, this, this, this)
         viewPager.adapter = lentaAdapter
         tabLayout_mainActivity.setupWithViewPager(viewPager)
     }
 
-
-    private fun setUpPhotoManager(presenters: List<DynamicPhotoPresenter>, data: List<PhotoInfo>) {
-        photoManager = PhotoManager(this, this, presenters, this, data)
+    private fun setUpPhotoManager(data: List<String>) {
+        photoManager = PhotoManager(applicationContext, this, this, data)
         photoManager!!.start()
     }
 
-    private fun setUpSlider(slider: ViewPager): DynamicPhotoPresenter {
-        slideAdapter = PhotoSlideAdapter(1, LayoutInflater.from(this), photoSlider_mainActivity)
+    private fun setUpSlider(slider: ViewPager, names: List<String>) {
+        slideAdapter = PhotoSlideAdapter(
+                1,
+                LayoutInflater.from(this),
+                photoSlider_mainActivity,
+                names,
+                this
+        )
         slider.adapter = slideAdapter
 //        slider.setPageTransformer(true, SlideAnimation())
         slider.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
@@ -144,14 +135,13 @@ class MainActivity :
 
             override fun onPageSelected(position: Int) {
                 slideAdapter!!.clearScaling()
-                setPagerTitle(position)
+                setSliderTitle(position)
             }
 
             override fun onPageScrolled(position: Int,
                                         positionOffset: Float,
                                         positionOffsetPixels: Int) {}
         })
-        return slideAdapter!!
     }
 
     private fun enableSlider(position: Int) {
@@ -159,7 +149,7 @@ class MainActivity :
             window.statusBarColor = ContextCompat.getColor(this, R.color.black)
 
         setSupportActionBar(sliderToolbar_mainActivity)
-        setPagerTitle(position)
+        setSliderTitle(position)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         photoSlider_mainActivity.setCurrentItem(position, false)
@@ -198,8 +188,16 @@ class MainActivity :
         return true
     }
 
+    override fun onItemCreate(presenterId: Int, listener: OnBitmapChangeListener, position: Int) {
+        photoManager?.addOnBitmapChangeListener(presenterId, listener, position)
+    }
+
+    override fun onSizeChange(newSize: Int) {
+        lentaAdapter?.setPhotoSize(newSize)
+        slideAdapter?.size = newSize
+    }
+
     private fun close() {
-        autoLoaderWorking = false
         photoManager?.close()
         photoManager = null
         infoGetter?.close()
