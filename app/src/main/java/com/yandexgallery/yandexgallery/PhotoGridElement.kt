@@ -7,8 +7,9 @@ import android.view.ViewGroup
 import kotlinx.android.synthetic.main.grid_element.view.*
 import kotlinx.android.synthetic.main.photo_card.view.*
 
-class PhotoGridElement(view: ViewGroup, private val onItemClickListener: OnItemClickListener) :
-        RecyclerView.ViewHolder(view), PhotoElement {
+class PhotoGridElement(view: ViewGroup,
+                       private val onItemClickListener: OnItemClickListener) :
+        RecyclerView.ViewHolder(view), OnBitmapChangeListener {
 
     private val photo = view.photo_gridElement
     private val progressBarContainer = view.progressBar_gridElement
@@ -22,7 +23,7 @@ class PhotoGridElement(view: ViewGroup, private val onItemClickListener: OnItemC
         }
     }
 
-    override fun setPhoto(bitmap: Bitmap?) {
+    override fun onBitmapChange(bitmap: Bitmap?) {
         if (bitmap != null) {
             progressBarContainer.visibility = View.GONE
             photo.visibility = View.VISIBLE
@@ -33,6 +34,4 @@ class PhotoGridElement(view: ViewGroup, private val onItemClickListener: OnItemC
         }
         photo.setImageBitmap(bitmap)
     }
-
-    override fun setData(info: PhotoInfo) { }
 }

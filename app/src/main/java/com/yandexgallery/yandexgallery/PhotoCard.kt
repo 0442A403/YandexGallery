@@ -6,8 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.photo_card.view.*
 
-class PhotoCard(view: ViewGroup, private val onItemClickListener: OnItemClickListener) :
-        RecyclerView.ViewHolder(view), PhotoElement {
+class PhotoCard(view: ViewGroup,
+                private val onItemClickListener: OnItemClickListener) :
+        RecyclerView.ViewHolder(view), OnBitmapChangeListener {
 
     private val photo = view.photo_photoCard
     private val name = view.name_photoCard
@@ -23,7 +24,7 @@ class PhotoCard(view: ViewGroup, private val onItemClickListener: OnItemClickLis
         }
     }
 
-    override fun setPhoto(bitmap: Bitmap?) {
+    override fun onBitmapChange(bitmap: Bitmap?) {
         if (bitmap != null) {
             progressBarContainer.visibility = View.GONE
             photo.visibility = View.VISIBLE
@@ -35,8 +36,8 @@ class PhotoCard(view: ViewGroup, private val onItemClickListener: OnItemClickLis
         photo.setImageBitmap(bitmap)
     }
 
-    override fun setData(info: PhotoInfo) {
-        date.text = info.created
-        name.text = info.name
+    fun setData(date: String, name: String) {
+        this.date.text = date
+        this.name.text = name
     }
 }
