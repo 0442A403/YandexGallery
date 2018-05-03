@@ -27,7 +27,7 @@ class PhotoInfoGetter(private val token: String,
             if (!isRunning)
                 return
             val array = JSONObject(response.body().string()).getJSONArray("items")
-            Log.i("MyYandex", "YaResponse: $array")
+            Log.i("YandexResponse", "YaResponse: $array")
             val res = ArrayList<PhotoInfo>()
             for (i in 0 until array.length()) {
                 val file = array.getJSONObject(i)

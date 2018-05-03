@@ -51,7 +51,6 @@ class MainActivity :
     }
 
     override fun onItemClick(position: Int) {
-        Log.i("MyYandex", "$position")
         enableSlider(position)
     }
 
